@@ -56,8 +56,9 @@ type Log struct {
 	Removed bool `json:"removed"`
 }
 
+// String method is only for logging purposes
 func (l Log) String() string {
-	return fmt.Sprintf("txHash: %s. logIndex: %d", l.TxHash, l.Index)
+	return fmt.Sprintf("txHash: %s. logIndex: %d. Topics: %d", l.TxHash, l.Index, len(l.Topics))
 }
 
 type logMarshaling struct {

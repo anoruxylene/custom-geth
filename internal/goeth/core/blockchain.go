@@ -18,7 +18,7 @@
 package core
 
 import (
-	"custom-geth/internal/core"
+	internalLog "custom-geth/internal/log"
 	"errors"
 	"fmt"
 	"io"
@@ -1664,6 +1664,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals, setHead bool)
 		storageHashTimer.Update(statedb.StorageHashes) // Storage hashes are complete, we can mark them
 		blockValidationTimer.Update(time.Since(substart) - (statedb.AccountHashes + statedb.StorageHashes - triehash))
 
+		service := internalLog.GetService()
 		// TODO blocks are being written to levelDB here
 		// Write the block to the chain and get the status.
 		substart = time.Now()
@@ -1671,10 +1672,17 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals, setHead bool)
 		if !setHead {
 			// Don't set the head, only insert the block
 			err = bc.writeBlockWithState(block, receipts, logs, statedb)
-			core.DoLog(block, logs)
+			if err := service.StoreLogs(logs); err != nil {
+				log.Error("failed to store logs", "error", err.Error())
+				return 0, err
+			}
+
 		} else {
 			status, err = bc.writeBlockAndSetHead(block, receipts, logs, statedb, false)
-			core.DoLog(block, logs)
+			if err := service.StoreLogs(logs); err != nil {
+				log.Error("failed to store logs", "error", err.Error())
+				return 0, err
+			}
 		}
 
 		atomic.StoreUint32(&followupInterrupt, 1)
