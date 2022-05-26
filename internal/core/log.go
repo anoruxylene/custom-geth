@@ -1,8 +1,8 @@
 package core
 
 import (
-	"custom-geth/internal/goethereum/core/types"
-	logger "custom-geth/internal/goethereum/log"
+	"custom-geth/internal/goeth/core/types"
+	logger "custom-geth/internal/goeth/log"
 )
 
 func DoLog(block *types.Block, logs []*types.Log) {
